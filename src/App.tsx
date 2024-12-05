@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import languages from "./data/languages.json";
-import "./App.css";
+import Loader from "./components/Loader";
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const model = new ChatOpenAI({ model: "gpt-4", apiKey: API_KEY });
@@ -61,21 +61,31 @@ function App() {
   };
 
   return (
-    <>
-      <h1>LLM text translate</h1>
-      <form onSubmit={handleSubmit} className="form">
+    <main className="grid gap-4 py-9 px-4">
+      <h1 className="text-xl text-center">Language Translator</h1>
+      <form
+        onSubmit={handleSubmit}
+        className="grid text-center place-items-center gap-4"
+      >
         <label htmlFor="language-select" className="sr-only">
           Choose a pet:
         </label>
 
-        <select name="language-select" id="language-select" required>
+        <select
+          name="language-select"
+          id="language-select"
+          required
+          className="px-4 py-2 border rounded "
+        >
           <option value="">Please choose a language to translate to</option>
           <option value="afrikaans">Afrikaans</option>
-          {languages?.map((language) => (
-            <option key={language} value={language}>
-              {language}
-            </option>
-          ))}
+          {languages
+            ?.sort((a, b) => a.localeCompare(b))
+            ?.map((language) => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
         </select>
 
         <label htmlFor="message" className="sr-only">
@@ -87,12 +97,27 @@ function App() {
           id="message"
           required
           placeholder="type your message here"
+          className="px-4 py-2"
         />
-        <button type="submit">Translate</button>
+        <button
+          type="submit"
+          className={`bg-purple-500 px-4 py-2 rounded border text-white hover:bg-purple-600 transition-colors ${
+            isLoading ? "opacity-50 cursor-wait" : ""
+          }`}
+          disabled={isLoading}
+        >
+          {isLoading ? "Translating..." : "Translate"}
+        </button>
       </form>
-      {isLoading && <p>Loading...</p>}
-      <div className="card">{response && !isLoading && <p>{response}</p>}</div>
-    </>
+      {isLoading && <Loader />}
+      <div className="text-center">
+        {response && !isLoading && (
+          <p className="text-lg py-4 px-12 bg-purple-200 border rounded">
+            {response}
+          </p>
+        )}
+      </div>
+    </main>
   );
 }
 
